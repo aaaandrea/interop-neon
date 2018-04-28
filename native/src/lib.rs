@@ -1,9 +1,19 @@
 #[macro_use]
 extern crate neon;
 extern crate num_cpus;
+extern crate fst;
+
+// write a program that ties that with a very basic usage of the Rust fst library's 
+// Set type. You'll want to expose two classes: one that takes a path on disk,
+// builds an FST there, and exposes a function to JS for adding words and a function
+// for finalizing the structure, and another class that accepts the path of a built
+// FST, loads it, and provides a read-only interface to its contents that can test
+// if a word is in it or not. Functionality-wise, these will approximately wrap
+// SetBulder and Set respectively. For the latter, ideally we'd load the built
+// file via mmap.
 
 
-
+use fst::Set;
 use neon::vm::{Call, JsResult};
 use neon::mem::Handle;
 use neon::js::{JsString, JsInteger, JsFunction, JsNumber, JsValue, JsNull, JsUndefined};
