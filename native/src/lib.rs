@@ -15,7 +15,7 @@ use fst_regex::Regex;
 
 use neon::vm::{Call, JsResult};
 use neon::mem::Handle;
-use neon::js::{JsString, JsInteger, JsFunction, JsNumber, JsValue, JsNull, JsUndefined, Key};
+use neon::js::{JsString, JsInteger, JsFunction, JsNumber, JsValue, JsNull, JsUndefined, Object};
 use neon::js::class::{JsClass, Class};
 
 pub struct FstSet {
@@ -57,7 +57,7 @@ declare_types! {
             // You could also call `finish()` here, but since we're building the set in
             // memory, there would be no way to get the `Vec<u8>` back.
             let bytes = build.into_inner().unwrap();
-            Ok(JsUndefined::new())
+            Ok(JsUndefined::new().upcast())
         }
     }
     // pub class ReadFst for Set {
