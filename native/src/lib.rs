@@ -4,18 +4,18 @@ extern crate num_cpus;
 extern crate fst;
 extern crate fst_regex;
 
-use std::error::Error;
+// use std::error::Error;
 
-use std::io;
-use std::io::prelude::*;
-use std::fs::File;
+// use std::io;
+// use std::io::prelude::*;
+// use std::fs::File;
 
-use fst::{Streamer, Set, SetBuilder};
-use fst_regex::Regex;
+use fst::{Streamer, Set, SetBuilder, IntoStreamer};
+// use fst_regex::Regex;
 
 use neon::vm::{Call, JsResult};
 use neon::mem::Handle;
-use neon::js::{JsString, JsInteger, JsFunction, JsNumber, JsValue, JsNull, JsUndefined, Object};
+use neon::js::{JsFunction, JsUndefined, Object};
 use neon::js::class::{JsClass, Class};
 
 pub struct FstSet {
@@ -60,38 +60,38 @@ declare_types! {
             Ok(JsUndefined::new().upcast())
         }
     }
-    // pub class ReadFst for Set {
-    //     init(mut call) {
-    //         let scope = call.scope;
-    //         // takes path on disk
-    //         // let pathway = Set::from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
-    //         //     raw::Fst::frin_path(path).map(Set);
-    //         // }
-    //         Ok(Set::new())
-    //     }
-    //
-    //     method search(call) {
-    //         let scope = call.scope;
-    //         let set = unsafe { Set::from_path("set.fst").unwrap() };
-    //         let mut stream = set.into_stream();
-    //         let mut keys = vec![];
-    //         while let Some(key) = stream.next() {
-    //             keys.push(key.to_vec());
-    //         }
-    //         assert_eq!(keys, vec![
-    //             "bruce".as_bytes(), "clarence".as_bytes(), "stevie".as_bytes(),
-    //         ]);
-    //         Ok(JsUndefined::new())
-    //     }
-    // }
+    pub class ReadFst for Set {
+        init(mut call) {
+            let scope = call.scope;
+            // takes path on disk
+            // let pathway = Set::from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
+            //     raw::Fst::frin_path(path).map(Set);
+            // }
+            Ok(fst::Set)
+        }
+
+        method search(call) {
+            let scope = call.scope;
+            let set = unsafe { Set::from_path("set.fst").unwrap() };
+            let mut stream = set.into_stream();
+            let mut keys = vec![];
+            while let Some(key) = stream.next() {
+                keys.push(key.to_vec());
+            }
+            assert_eq!(keys, vec![
+                "bruce".as_bytes(), "clarence".as_bytes(), "stevie".as_bytes(),
+            ]);
+            Ok(JsUndefined::new().upcast())
+        }
+    }
 }
 
 register_module!(m, {
     // try!(m.export("example", example));
-    let writeClass: Handle<JsClass<WriteFst>> = try!(WriteFst::class(m.scope));
-    let writeConstructor: Handle<JsFunction<WriteFst>> = try!(writeClass.constructor(m.scope));
+    let write_class: Handle<JsClass<WriteFst>> = try!(WriteFst::class(m.scope));
+    let write_constructor: Handle<JsFunction<WriteFst>> = try!(write_class.constructor(m.scope));
 
-	try!(m.exports.set("WriteFst", writeConstructor));
+	try!(m.exports.set("WriteFst", write_constructor));
     // try!(m.export("ReadFst", ReadFst));
 	Ok(())
 });
