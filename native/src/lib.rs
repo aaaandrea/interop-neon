@@ -6,14 +6,12 @@ extern crate fst_regex;
 
 use std::error::Error;
 
-// use std::io;
-// use std::io::prelude::*;
-// use std::fs::File;
+use std::io;
+use std::io::prelude::*;
+use std::fs::File;
 
-use fst::{Streamer, Set, SetBuilder, IntoStreamer, Map};
-// use fst_regex::Regex;
+use fst::{Streamer, Set, SetBuilder, IntoStreamer};
 
-use neon::vm::{Call, JsResult};
 use neon::mem::Handle;
 use neon::js::{JsFunction, JsUndefined, Object};
 use neon::js::class::{JsClass, Class};
@@ -22,16 +20,6 @@ pub struct FstSet {
     pub something: Set,
 }
 
-// fn example() -> Result<(), Box<Error>> {
-//     let set1 = Set::from_iter(&["AC/DC", "Aerosmith"])?;
-//     let set2 = Set::from_iter(&["Bob Seger", "Bruce Springsteen"])?;
-//     let set3 = Set::from_iter(&["George Thorogood", "Golden Earring"])?;
-//     let set4 = Set::from_iter(&["Kansas"])?;
-//     let set5 = Set::from_iter(&["Metallica"])?;
-//
-//     Ok(())
-// }
-
 declare_types! {
     pub class WriteFst as WriteFst for SetBuilder<Vec<u8>> {
         init(mut call) {
@@ -39,67 +27,54 @@ declare_types! {
             // takes path on disk
 
             let mut build = SetBuilder::memory();
-            // let mut wtr = io::BufWriter::new(File::create("set.fst").unwrap());
-            // let pathway = Set::from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
-            //     raw::Fst::frin_path(path).map(Set);
-            // }
             Ok(build)
         }
 
-        method  buildFST(call) {
-            let scope = call.scope;
+        method  buildFST(filename: &str) {
+
             // builds fst on path
             let mut build = SetBuilder::memory();
-            build.insert("bruce").unwrap();
-            build.insert("clarence").unwrap();
-            build.insert("stevie").unwrap();
+            let this: Handle<WriteFst> = call.arguments.this(scope);
 
-            // You could also call `finish()` here, but since we're building the set in
-            // memory, there would be no way to get the `Vec<u8>` back.
-            let bytes = build.into_inner().unwrap();
-            Ok(JsUndefined::new().upcast())
-        }
-    }
-    pub class ReadFst for Set {
-        init(mut call) {
-            let scope = call.scope;
-            // takes path on disk
-            // let pathway = Set::from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
-            //     raw::Fst::frin_path(path).map(Set);
-            // }
-            // let map = Map::from_path("map.fst").unwrap();
-            let set = unsafe { Set::from_path("set.fst").unwrap() };
-            let mut stream = set.into_stream();
-            // pub enum rdr Result<T, E> {
-            //     Ok(T),
-            //     Err(E),
-            // }
-            let the_result: Result<fst::Set> = Ok(set);
-            Ok(std::result::Result<fst::Set>);
-        }
-
-        method search(call) {
-            let scope = call.scope;
-            // let set = unsafe { Set::from_path("set.fst").unwrap() };
-            // let mut stream = set.into_stream();
-            let mut keys = vec![];
-            while let Some(key) = stream.next() {
-                keys.push(key.to_vec());
+            let file = File::open(&filename)?;
+            let reader = io::BufRreader::new(file);
+            for line in reader.lines() {
+                let line = line?;
+                build.insert(line).unwrap();
             }
-            assert_eq!(keys, vec![
-                "bruce".as_bytes(), "clarence".as_bytes(), "stevie".as_bytes(),
-            ]);
+            // let bytes = build.into_inner().unwrap();
             Ok(JsUndefined::new().upcast())
         }
     }
+    // pub class ReadFst for Set {
+    //     init(call) {
+    //         let scope = call.scope;
+    //         let set = unsafe { Set::from_path("set.fst").unwrap() };
+    //         Ok(set)
+    //     }
+    //
+    //     method search(call) {
+    //         let scope = call.scope;
+    //         // let set = scope.set;
+    //         // let set = unsafe { Set::from_path("set.fst").unwrap() };
+    //         let mut stream = set.into_stream();
+    //         let mut keys = vec![];
+    //         while let Some(key) = stream.next() {
+    //             keys.push(key.to_vec());
+    //         }
+    //         assert_eq!(keys, vec![
+    //             "bruce".as_bytes(), "clarence".as_bytes(), "stevie".as_bytes(),
+    //         ]);
+    //         Ok(JsUndefined::new().upcast())
+    //     }
+    // }
 }
 
 register_module!(m, {
-    // try!(m.export("example", example));
     let write_class: Handle<JsClass<WriteFst>> = try!(WriteFst::class(m.scope));
     let write_constructor: Handle<JsFunction<WriteFst>> = try!(write_class.constructor(m.scope));
 
 	try!(m.exports.set("WriteFst", write_constructor));
-    // try!(m.export("ReadFst", ReadFst));
+    // try!(m.exports.set("ReadFst", ReadFst));
 	Ok(())
 });
