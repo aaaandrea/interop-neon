@@ -67,7 +67,7 @@ declare_types! {
             // let pathway = Set::from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
             //     raw::Fst::frin_path(path).map(Set);
             // }
-            Ok(fst::Set)
+            Ok(None)
         }
 
         method search(call) {
