@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate neon;
-extern crate num_cpus;
 extern crate fst;
 extern crate fst_regex;
+extern crate fst_levenshtein;
+
 
 use std::error::Error;
 
@@ -16,17 +17,14 @@ use neon::mem::Handle;
 use neon::js::{JsFunction, JsUndefined, Object};
 use neon::js::class::{JsClass, Class};
 
-pub struct FstSet {
-    pub something: Set,
-}
 
 declare_types! {
     pub class WriteFst as WriteFst for SetBuilder<Vec<u8>> {
-        init(mut call) {
-            let scope = call.scope;
+        init(call) {
+            // let scope = call.scope;
             // takes path on disk
 
-            let mut build = SetBuilder::memory();
+            let build = SetBuilder::memory();
             Ok(build)
         }
 
@@ -38,14 +36,19 @@ declare_types! {
 
             let file = File::open(&filename)?;
             let reader = io::BufRreader::new(file);
-            for line in reader.lines() {
-                let line = line?;
-                build.insert(line).unwrap();
+            let mut buf = String::new();
+            while reader.read_line(&mut buf)? > 0 {
+                {
+                    let line = buf.trim_right();
+                    build.insert(line);
+                }
+                buf.clear();
             }
-            // let bytes = build.into_inner().unwrap();
+            let bytes = build.into_inner().unwrap();
             Ok(JsUndefined::new().upcast())
         }
     }
+
     // pub class ReadFst for Set {
     //     init(call) {
     //         let scope = call.scope;
@@ -55,8 +58,7 @@ declare_types! {
     //
     //     method search(call) {
     //         let scope = call.scope;
-    //         // let set = scope.set;
-    //         // let set = unsafe { Set::from_path("set.fst").unwrap() };
+    //         let set = unsafe { Set::from_path("set.fst").unwrap() };
     //         let mut stream = set.into_stream();
     //         let mut keys = vec![];
     //         while let Some(key) = stream.next() {
