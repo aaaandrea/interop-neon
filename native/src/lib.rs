@@ -68,17 +68,20 @@ declare_types! {
             //     raw::Fst::frin_path(path).map(Set);
             // }
             // let map = Map::from_path("map.fst").unwrap();
+            let set = unsafe { Set::from_path("set.fst").unwrap() };
+            let mut stream = set.into_stream();
             // pub enum rdr Result<T, E> {
             //     Ok(T),
             //     Err(E),
             // }
-            Ok(std::result::Result<fst::Set> {});
+            let the_result: Result<fst::Set> = Ok(set);
+            Ok(std::result::Result<fst::Set>);
         }
 
         method search(call) {
             let scope = call.scope;
-            let set = unsafe { Set::from_path("set.fst").unwrap() };
-            let mut stream = set.into_stream();
+            // let set = unsafe { Set::from_path("set.fst").unwrap() };
+            // let mut stream = set.into_stream();
             let mut keys = vec![];
             while let Some(key) = stream.next() {
                 keys.push(key.to_vec());
