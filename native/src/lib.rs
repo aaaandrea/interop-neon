@@ -4,13 +4,13 @@ extern crate num_cpus;
 extern crate fst;
 extern crate fst_regex;
 
-// use std::error::Error;
+use std::error::Error;
 
 // use std::io;
 // use std::io::prelude::*;
 // use std::fs::File;
 
-use fst::{Streamer, Set, SetBuilder, IntoStreamer};
+use fst::{Streamer, Set, SetBuilder, IntoStreamer, Map};
 // use fst_regex::Regex;
 
 use neon::vm::{Call, JsResult};
@@ -67,7 +67,12 @@ declare_types! {
             // let pathway = Set::from_path<P: AsRef<Path>>(path: P) -> Result<Self> {
             //     raw::Fst::frin_path(path).map(Set);
             // }
-            Ok(None)
+            // let map = Map::from_path("map.fst").unwrap();
+            // pub enum rdr Result<T, E> {
+            //     Ok(T),
+            //     Err(E),
+            // }
+            Ok(std::result::Result<fst::Set> {});
         }
 
         method search(call) {
