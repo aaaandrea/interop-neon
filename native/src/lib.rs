@@ -24,15 +24,20 @@ declare_types! {
             // let scope = call.scope;
             // takes path on disk
 
-            let build = SetBuilder::memory();
+            // let mut build = SetBuilder::memory();
+            let mut wtr = io::BufWriter::new(File::create("/tmp/set.fst").unwrap());
+            let mut build = SetBuilder::new(wtr).unwrap();
             Ok(build)
         }
 
         method  buildFST(filename: &str) {
 
             // builds fst on path
-            let mut build = SetBuilder::memory();
+            // let mut build = SetBuilder::memory();
             let this: Handle<WriteFst> = call.arguments.this(scope);
+
+
+            let mut build = this.build;
 
             let file = File::open(&filename)?;
             let reader = io::BufRreader::new(file);
