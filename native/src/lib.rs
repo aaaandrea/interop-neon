@@ -1,9 +1,6 @@
 #[macro_use]
 extern crate neon;
 extern crate fst;
-extern crate fst_regex;
-extern crate fst_levenshtein;
-
 
 use std::error::Error;
 
@@ -11,50 +8,65 @@ use std::io;
 use std::io::prelude::*;
 use std::fs::File;
 
-use fst::{Streamer, Set, SetBuilder, IntoStreamer};
+use fst::{Set, SetBuilder, IntoStreamer};
 
 use neon::mem::Handle;
-use neon::js::{JsFunction, JsUndefined, Object};
+use neon::vm;
+use neon::vm::{This, FunctionCall, Lock, JsResult};
+use neon::js::{JsFunction, JsUndefined, Object, JsString, Value};
 use neon::js::class::{JsClass, Class};
 
 
+trait CheckArgument<'a> {
+  fn check_argument<V: Value>(&mut self, i: i32) -> JsResult<'a, V>;
+}
+
+impl<'a, T: This> CheckArgument<'a> for FunctionCall<'a, T> {
+  fn check_argument<V: Value>(&mut self, i: i32) -> JsResult<'a, V> {
+    self.arguments.require(self.scope, i)?.check::<V>()
+  }
+}
+
 declare_types! {
-    pub class WriteFst as WriteFst for SetBuilder<Vec<u8>> {
+    pub class JsSetBuilder as JsSetBuilder for SetBuilder<io::BufWriter<File>> {
         init(call) {
             // let scope = call.scope;
             // takes path on disk
-
+            // let this: Handle<JsSetBuilder> = call.arguments.this(scope);
             // let mut build = SetBuilder::memory();
+
             let mut wtr = io::BufWriter::new(File::create("/tmp/set.fst").unwrap());
             let mut build = SetBuilder::new(wtr).unwrap();
             Ok(build)
         }
 
-        method  buildFST(filename: &str) {
+        method  insert(mut call) {
 
             // builds fst on path
             // let mut build = SetBuilder::memory();
-            let this: Handle<WriteFst> = call.arguments.this(scope);
+            let word = call
+                .check_argument::<JsString>(0)
+                ?.value();
+            let scope = call.scope;
+            let mut this: Handle<JsSetBuilder> = call.arguments.this(scope);
 
+            // let this = try!(vm::lock(this, |setbuilder| {
+            let setbuilder: &mut SetBuilder<io::BufWriter<File>> = this.grab(|setbuilder| setbuilder);
+            // add item to setbuilder
+            setbuilder.insert(word).unwrap();
 
-            let mut build = this.build;
+            // let mut build = this.build;
+            // let bytes = build.into_inner().unwrap();
 
-            let file = File::open(&filename)?;
-            let reader = io::BufRreader::new(file);
-            let mut buf = String::new();
-            while reader.read_line(&mut buf)? > 0 {
-                {
-                    let line = buf.trim_right();
-                    build.insert(line);
-                }
-                buf.clear();
-            }
-            let bytes = build.into_inner().unwrap();
+            Ok(JsUndefined::new().upcast())
+        }
+
+        method finish(mut call) {
             Ok(JsUndefined::new().upcast())
         }
     }
 
-    // pub class ReadFst for Set {
+    // pub class JsSet as JsSet for Set {
     //     init(call) {
     //         let scope = call.scope;
     //         let set = unsafe { Set::from_path("set.fst").unwrap() };
@@ -78,10 +90,10 @@ declare_types! {
 }
 
 register_module!(m, {
-    let write_class: Handle<JsClass<WriteFst>> = try!(WriteFst::class(m.scope));
-    let write_constructor: Handle<JsFunction<WriteFst>> = try!(write_class.constructor(m.scope));
+    let set_builder_class: Handle<JsClass<JsSetBuilder>> = try!(JsSetBuilder::class(m.scope));
+    let set_builder_constructor: Handle<JsFunction<JsSetBuilder>> = try!(set_builder_class.constructor(m.scope));
 
-	try!(m.exports.set("WriteFst", write_constructor));
+	try!(m.exports.set("SetBuilder", set_builder_constructor));
     // try!(m.exports.set("ReadFst", ReadFst));
 	Ok(())
 });
