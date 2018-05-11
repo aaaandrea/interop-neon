@@ -13,7 +13,7 @@ use fst::{Set, SetBuilder, IntoStreamer};
 use neon::mem::Handle;
 use neon::vm;
 use neon::vm::{This, FunctionCall, Lock, JsResult};
-use neon::js::{JsFunction, JsUndefined, Object, JsString, Value};
+use neon::js::{JsFunction, JsUndefined, Object, JsString, Value, JsBoolean};
 use neon::js::class::{JsClass, Class};
 
 
@@ -28,73 +28,81 @@ impl<'a, T: This> CheckArgument<'a> for FunctionCall<'a, T> {
 }
 
 declare_types! {
-    pub class JsSetBuilder as JsSetBuilder for SetBuilder<io::BufWriter<File>> {
-        init(call) {
-            // let scope = call.scope;
-            // takes path on disk
-            // let this: Handle<JsSetBuilder> = call.arguments.this(scope);
-            // let mut build = SetBuilder::memory();
+    pub class JsSetBuilder as JsSetBuilder for Option<SetBuilder<io::BufWriter<File>>>{
+        init(mut call) {
+            let filename = call
+                .check_argument::<JsString>(0)
+                ?.value();
 
-            let mut wtr = io::BufWriter::new(File::create("/tmp/set.fst").unwrap());
+            let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
             let mut build = SetBuilder::new(wtr).unwrap();
-            Ok(build)
+
+            Ok(Some(build))
         }
 
         method  insert(mut call) {
-
-            // builds fst on path
-            // let mut build = SetBuilder::memory();
             let word = call
                 .check_argument::<JsString>(0)
                 ?.value();
             let scope = call.scope;
             let mut this: Handle<JsSetBuilder> = call.arguments.this(scope);
-
-            // let this = try!(vm::lock(this, |setbuilder| {
-            let setbuilder: &mut SetBuilder<io::BufWriter<File>> = this.grab(|setbuilder| setbuilder);
-            // add item to setbuilder
-            setbuilder.insert(word).unwrap();
-
-            // let mut build = this.build;
-            // let bytes = build.into_inner().unwrap();
+            this.grab(|setbuilder| {
+                match setbuilder {
+                    Some(builder) => {
+                        builder.insert(word).unwrap();
+                    },
+                    None => {
+                        // return error
+                    }
+                }
+            });
 
             Ok(JsUndefined::new().upcast())
         }
 
         method finish(mut call) {
+            let scope = call.scope;
+            let mut this: Handle<JsSetBuilder> = call.arguments.this(scope);
+
+            this.grab(|setbuilder| {
+                match setbuilder.take() {
+                    Some(builder) => {
+                        builder.finish();
+                    },
+                    None => {
+                        // return error
+                    }
+                }
+            });
             Ok(JsUndefined::new().upcast())
         }
     }
 
-    // pub class JsSet as JsSet for Set {
-    //     init(call) {
-    //         let scope = call.scope;
-    //         let set = unsafe { Set::from_path("set.fst").unwrap() };
-    //         Ok(set)
-    //     }
-    //
-    //     method contains(mut call) {
-    //         let word = call
-    //             .check_argument::<JsString>(0)
-    //             ?.value();
-    //         let scope = call.scope;
-    //         let set = unsafe { Set::from_path("set.fst").unwrap() };
-    //         // let set = Set::from_iter(&word).unwrap();
-    //
-    //         let mut this: Handle<JsSet> = call.arguments.this(scope);
-    //
-    //         // let mut stream = set.into_stream();
-    //         // let mut keys = vec![];
-    //         // while let Some(key) = stream.next() {
-    //         //     keys.push(key.to_vec());
-    //         // }
-    //         // assert_eq!(keys, vec![
-    //         //     "bruce".as_bytes(), "clarence".as_bytes(), "stevie".as_bytes(),
-    //         // ]);
-    //
-    //         Ok(JsUndefined::new().upcast())
-    //     }
-    // }
+    pub class JsSet as JsSet for Set {
+        init(mut call) {
+            let filename = call
+                .check_argument::<JsString>(0)
+                ?.value();
+            let scope = call.scope;
+            let set = unsafe { Set::from_path(filename).unwrap() };
+            Ok(set)
+        }
+
+        method contains(mut call) {
+            let word = call
+                .check_argument::<JsString>(0)
+                ?.value();
+            let scope = call.scope;
+            let mut this: Handle<JsSet> = call.arguments.this(scope);
+
+            Ok(JsBoolean::new(
+                scope,
+                this.grab(|set| {
+                    set.contains(&word)
+                })
+            ).upcast())
+        }
+    }
 }
 
 register_module!(m, {
@@ -103,9 +111,9 @@ register_module!(m, {
         let constructor: Handle<JsFunction<JsSetBuilder>> = try!(class.constructor(m.scope));
         try!(m.exports.set("SetBuilder", constructor));
 
-        // let class: Handle<JsClass<JsSet>> = try!(JsSet::class(m.scope));
-        // let constructor: Handle<JsFunction<JsSet>> = try!(class.constructor(m.scope));
-        // try!(m.exports.set("Set", constructor));
+        let class: Handle<JsClass<JsSet>> = try!(JsSet::class(m.scope));
+        let constructor: Handle<JsFunction<JsSet>> = try!(class.constructor(m.scope));
+        try!(m.exports.set("Set", constructor));
 
         Ok(())
 });
