@@ -73,27 +73,39 @@ declare_types! {
     //         Ok(set)
     //     }
     //
-    //     method search(call) {
+    //     method contains(mut call) {
+    //         let word = call
+    //             .check_argument::<JsString>(0)
+    //             ?.value();
     //         let scope = call.scope;
     //         let set = unsafe { Set::from_path("set.fst").unwrap() };
-    //         let mut stream = set.into_stream();
-    //         let mut keys = vec![];
-    //         while let Some(key) = stream.next() {
-    //             keys.push(key.to_vec());
-    //         }
-    //         assert_eq!(keys, vec![
-    //             "bruce".as_bytes(), "clarence".as_bytes(), "stevie".as_bytes(),
-    //         ]);
+    //         // let set = Set::from_iter(&word).unwrap();
+    //
+    //         let mut this: Handle<JsSet> = call.arguments.this(scope);
+    //
+    //         // let mut stream = set.into_stream();
+    //         // let mut keys = vec![];
+    //         // while let Some(key) = stream.next() {
+    //         //     keys.push(key.to_vec());
+    //         // }
+    //         // assert_eq!(keys, vec![
+    //         //     "bruce".as_bytes(), "clarence".as_bytes(), "stevie".as_bytes(),
+    //         // ]);
+    //
     //         Ok(JsUndefined::new().upcast())
     //     }
     // }
 }
 
 register_module!(m, {
-    let set_builder_class: Handle<JsClass<JsSetBuilder>> = try!(JsSetBuilder::class(m.scope));
-    let set_builder_constructor: Handle<JsFunction<JsSetBuilder>> = try!(set_builder_class.constructor(m.scope));
 
-	try!(m.exports.set("SetBuilder", set_builder_constructor));
-    // try!(m.exports.set("ReadFst", ReadFst));
-	Ok(())
+        let class: Handle<JsClass<JsSetBuilder>> = try!(JsSetBuilder::class(m.scope));
+        let constructor: Handle<JsFunction<JsSetBuilder>> = try!(class.constructor(m.scope));
+        try!(m.exports.set("SetBuilder", constructor));
+
+        // let class: Handle<JsClass<JsSet>> = try!(JsSet::class(m.scope));
+        // let constructor: Handle<JsFunction<JsSet>> = try!(class.constructor(m.scope));
+        // try!(m.exports.set("Set", constructor));
+
+        Ok(())
 });
