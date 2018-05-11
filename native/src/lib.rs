@@ -2,19 +2,18 @@
 extern crate neon;
 extern crate fst;
 
-use std::error::Error;
-
 use std::io;
 use std::io::prelude::*;
 use std::fs::File;
-
-use fst::{Set, SetBuilder, IntoStreamer};
+use std::error::Error;
 
 use neon::mem::Handle;
 use neon::vm;
 use neon::vm::{This, FunctionCall, Lock, JsResult};
 use neon::js::{JsFunction, JsUndefined, Object, JsString, Value, JsBoolean};
 use neon::js::class::{JsClass, Class};
+
+use fst::{Set, SetBuilder, IntoStreamer};
 
 
 trait CheckArgument<'a> {
