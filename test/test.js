@@ -19,7 +19,7 @@ tape("SetBuilder insertion and Set lookup", (t) => {
 
     let set = new fst.Set("set.fst");
     for (let name of ["bruce", "clarence", "stevie"]) {
-        t.ok(set.contains(name));
+        t.ok(set.contains(name), "Set contains expected word");
     }
     t.end();
 })
