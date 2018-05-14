@@ -1,4 +1,4 @@
-var fst = require('../native');
+var fst = require('../lib');
 var assert = require('assert');
 
 let build = new fst.SetBuilder("set.fst");
