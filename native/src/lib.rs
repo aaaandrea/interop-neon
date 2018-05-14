@@ -32,6 +32,7 @@ declare_types! {
                 ?.value();
 
             let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
+
             let mut build = SetBuilder::new(wtr).unwrap();
 
             Ok(Some(build))

@@ -17,6 +17,7 @@
   },
   "scripts": {
     "install": "neon build",
-    "build": "neon build"
+    "build": "neon build",
+    "test": "tape test/*.test.js"
   }
 }
