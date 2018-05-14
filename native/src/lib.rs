@@ -3,17 +3,15 @@ extern crate neon;
 extern crate fst;
 
 use std::io;
-use std::io::prelude::*;
 use std::fs::File;
 use std::error::Error;
 
 use neon::mem::Handle;
-use neon::vm;
 use neon::vm::{This, FunctionCall, Lock, JsResult};
 use neon::js::{JsFunction, JsUndefined, Object, JsString, Value, JsBoolean};
 use neon::js::class::{JsClass, Class};
 
-use fst::{Set, SetBuilder, IntoStreamer};
+use fst::{Set, SetBuilder};
 
 
 trait CheckArgument<'a> {
@@ -52,6 +50,7 @@ declare_types! {
                     },
                     None => {
                         // return error
+                        panic!("SetBuilder not available for insertion");
                     }
                 }
             });
@@ -70,6 +69,7 @@ declare_types! {
                     },
                     None => {
                         // return error
+                        panic!("SetBuilder not available for finish()");
                     }
                 }
             });
@@ -82,7 +82,6 @@ declare_types! {
             let filename = call
                 .check_argument::<JsString>(0)
                 ?.value();
-            let scope = call.scope;
             let set = unsafe { Set::from_path(filename).unwrap() };
             Ok(set)
         }
