@@ -12,6 +12,9 @@
   "dependencies": {
     "neon-cli": "^0.1.22"
   },
+  "devDependencies": {
+    "tape": "4.6.3"
+  },
   "scripts": {
     "install": "neon build",
     "build": "neon build"
