@@ -31,7 +31,12 @@ declare_types! {
                 .check_argument::<JsString>(0)
                 ?.value();
 
-            let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
+            // let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
+            let mut wtr = io::BufWriter::new(File::create(filename) {
+                Ok(()) => (), //succeeded
+                Err(e) => println!("failed to write to file: {}", e)
+            });
+
 
             let mut build = SetBuilder::new(wtr).unwrap();
 
