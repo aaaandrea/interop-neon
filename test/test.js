@@ -1,0 +1,15 @@
+var fst = require('../native');
+var assert = require('assert');
+
+let build = new fst.SetBuilder("set.fst");
+
+build.insert("bruce");
+build.insert("clarence");
+build.insert("stevie");
+
+build.finish();
+
+let set = new fst.Set("set.fst");
+for (let name of ["bruce", "clarence", "stevie"]) {
+    assert.ok(set.contains(name));
+}
