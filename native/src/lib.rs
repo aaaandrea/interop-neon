@@ -24,6 +24,21 @@ impl<'a, T: This> CheckArgument<'a> for FunctionCall<'a, T> {
   }
 }
 
+enum MyError {
+    FileWriteError
+}
+
+impl From<io::Error> for MyError {
+    fn from(e: io::Error) -> MyError {
+        MyError::FileWriteError
+    }
+}
+
+fn write_to_file_question() -> Result<(), MyError> {
+    let mut file = File::create("my_best_friends.txt")?;
+    Ok(())
+}
+
 declare_types! {
     pub class JsSetBuilder as JsSetBuilder for Option<SetBuilder<io::BufWriter<File>>>{
         init(mut call) {
@@ -32,10 +47,17 @@ declare_types! {
                 ?.value();
 
             // let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
-            let mut wtr = io::BufWriter::new(File::create(filename) {
-                Ok(()) => (), //succeeded
-                Err(e) => println!("failed to write to file: {}", e)
-            });
+
+
+            let mut wtr = try!(io::BufWriter::new(File::create(filename)));
+
+
+            // let mut wtr = try!(io::BufWriter::new(File::create(filename).map_err(|e| e.to_string())));
+
+            // let mut wtr = io::BufWriter::new(File::create(filename) {
+            //     Ok(()) => (), //succeeded
+            //     Err(e) => println!("failed to write to file: {}", e)
+            // });
 
 
             let mut build = SetBuilder::new(wtr).unwrap();
