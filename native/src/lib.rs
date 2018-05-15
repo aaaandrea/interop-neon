@@ -48,8 +48,10 @@ declare_types! {
 
             // let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
 
+            let mut buffer = io::BufWriter::new(File::create(filename).unwrap());
+            let wtr = buffer.into_inner().unwrap();
 
-            let mut wtr = try!(io::BufWriter::new(File::create(filename)));
+            // let mut wtr = try!(io::BufWriter::new(File::create(filename)));
 
 
             // let mut wtr = try!(io::BufWriter::new(File::create(filename).map_err(|e| e.to_string())));
