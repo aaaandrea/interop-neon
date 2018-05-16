@@ -11,8 +11,7 @@ addons:
 install:
   - node -v
   - which node
-  - clang++ -v
-  - which clang++
+  - curl https://sh.rustup.rs -sSf | sh
   - make ${BUILDTYPE}
 
 # *Here we run tests*
@@ -39,24 +38,29 @@ matrix:
     - os: linux
       env: BUILDTYPE=release TOOLSET=cfi CXXFLAGS="-fsanitize=cfi -fvisibility=hidden" LDFLAGS="-fsanitize=cfi"
       node_js: 6
+
     # linux publishable node v6/release
     - os: linux
       env: BUILDTYPE=release
       node_js: 6
+
     # linux publishable node v6/debug
     - os: linux
       env: BUILDTYPE=debug
       node_js: 6
+
     # osx publishable node v6/release
     - os: osx
       osx_image: xcode9.2
       env: BUILDTYPE=release
       node_js: 6
+
     # osx publishable node v6/debug
     - os: osx
       osx_image: xcode9.2
       env: BUILDTYPE=debug
       node_js: 6
+
     # linux sanitizer build node v6/debug
     - os: linux
       env: BUILDTYPE=debug TOOLSET=asan
@@ -67,6 +71,7 @@ matrix:
         - make sanitize
       # Overrides `before_script` (tests are already run in `make sanitize`)
       before_script:
+
     # osx sanitizer build node v6/debug
     - os: osx
       env: BUILDTYPE=debug TOOLSET=asan
@@ -96,6 +101,7 @@ matrix:
         - make ${BUILDTYPE}
       # Overrides `script` to disable publishing
       script: []
+
     # Coverage build
     - os: linux
       env: BUILDTYPE=debug CXXFLAGS="--coverage" LDFLAGS="--coverage"
@@ -107,6 +113,7 @@ matrix:
         - curl -S -f https://codecov.io/bash -o codecov
         - chmod +x codecov
         - ./codecov -x "llvm-cov gcov" -Z
+
     # Clang format build
     - os: linux
       # can be generic since we don't need nodejs to run formatting
@@ -122,6 +129,7 @@ matrix:
       before_script:
       # Overrides `script` to disable publishing
       script:
+
     # Clang tidy build
     - os: linux
       env: CLANG_TIDY
