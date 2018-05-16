@@ -46,10 +46,10 @@ declare_types! {
                 .check_argument::<JsString>(0)
                 ?.value();
 
-            // let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
+            let wtr = io::BufWriter::new(File::create(filename).unwrap());
 
-            let mut buffer = io::BufWriter::new(File::create(filename).unwrap());
-            let wtr = buffer.into_inner().unwrap();
+            // let mut buffer = io::BufWriter::new(File::create(filename).unwrap());
+            // let wtr = buffer.into_inner().unwrap();
 
             // let mut wtr = try!(io::BufWriter::new(File::create(filename)));
 
