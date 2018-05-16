@@ -14,15 +14,14 @@ use neon::js::class::{JsClass, Class};
 
 use fst::{Set, SetBuilder};
 
-trait CheckArgument<'a> {
-  fn check_argument<V: Value>(&mut self, i: i32) -> VmResult<V>;
+
+trait CheckArgument {
+  fn check_argument<V: Value>(&mut self, i: i32) -> JsResult<V>;
 }
 
-impl<'a, T: This> CheckArgument<'a> for FunctionCall<'a, T> {
-  fn check_argument<V: Value>(&mut self, i: i32) -> VmResult<V> {
-    self.arguments.require(self.scope, i)
-            // .unwrap_or_else(|e| return Err(Throw))
-            .check::<V>()
+impl<'a, T: This> CheckArgument for FunctionCall<'a, T> {
+  fn check_argument<V: Value>(&mut self, i: i32) -> JsResult<V> {
+    self.arguments.require(self.scope, i)?.check::<V>()
   }
 }
 
@@ -48,7 +47,10 @@ declare_types! {
                 .check_argument::<JsString>(0)
                 ?.value();
 
-            let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
+            let wtr = io::BufWriter::new(File::create(filename).unwrap());
+
+            // let mut buffer = io::BufWriter::new(File::create(filename).unwrap());
+            // let wtr = buffer.into_inner().unwrap();
 
             // let mut wtr = try!(io::BufWriter::new(File::create(filename)));
 
