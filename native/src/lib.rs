@@ -21,7 +21,7 @@ trait CheckArgument {
 
 impl<'a, T: This> CheckArgument for FunctionCall<'a, T> {
   fn check_argument<V: Value>(&mut self, i: i32) -> JsResult<V> {
-    self.arguments.require(self.scope, 0)?.check::<V>()
+    self.arguments.require(self.scope, i)?.check::<V>()
   }
 }
 
