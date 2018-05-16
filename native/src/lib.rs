@@ -10,7 +10,6 @@ use neon::mem::Handle;
 use neon::vm::{This, FunctionCall, Lock, JsResult};
 use neon::js::{JsFunction, JsUndefined, Object, JsString, Value, JsBoolean};
 use neon::js::class::{JsClass, Class};
-use neon::js::binary::{JsBuffer};
 
 use fst::{Set, SetBuilder};
 
@@ -43,7 +42,9 @@ fn write_to_file_question() -> Result<(), MyError> {
 declare_types! {
     pub class JsSetBuilder as JsSetBuilder for Option<SetBuilder<io::BufWriter<File>>>{
         init(mut call) {
-            let filename = call.check_argument::<JsString>(0)?.value();
+            let filename = call
+                .check_argument::<JsString>(0)
+                ?.value();
 
             let wtr = io::BufWriter::new(File::create(filename).unwrap());
 
@@ -67,7 +68,9 @@ declare_types! {
         }
 
         method  insert(mut call) {
-            let word = call.check_argument::<JsString>(0)?.value();
+            let word = call
+                .check_argument::<JsString>(0)
+                ?.value();
             let scope = call.scope;
             let mut this: Handle<JsSetBuilder> = call.arguments.this(scope);
             this.grab(|setbuilder| {
@@ -106,7 +109,9 @@ declare_types! {
 
     pub class JsSet as JsSet for Set {
         init(mut call) {
-            let filename = call.check_argument::<JsString>(0)?.value();
+            let filename = call
+                .check_argument::<JsString>(0)
+                ?.value();
             let set = unsafe { Set::from_path(filename).unwrap() };
             Ok(set)
         }
