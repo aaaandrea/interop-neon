@@ -117,7 +117,9 @@ declare_types! {
         }
 
         method contains(mut call) {
-            let word = call.check_argument::<JsString>(0)?.value();
+            let word = call
+                .check_argument::<JsString>(0)
+                ?.value();
             let scope = call.scope;
             let mut this: Handle<JsSet> = call.arguments.this(scope);
 
