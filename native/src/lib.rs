@@ -7,8 +7,9 @@ use std::fs::File;
 use std::error::Error;
 
 use neon::mem::Handle;
-use neon::vm::{This, FunctionCall, Lock, JsResult};
+use neon::vm::{This, FunctionCall, Lock, JsResult, Throw, VmResult};
 use neon::js::{JsFunction, JsUndefined, Object, JsString, Value, JsBoolean};
+use neon::js::error::throw;
 use neon::js::class::{JsClass, Class};
 
 use fst::{Set, SetBuilder};
@@ -24,20 +25,20 @@ impl<'a, T: This> CheckArgument for FunctionCall<'a, T> {
   }
 }
 
-enum MyError {
-    FileWriteError
-}
-
-impl From<io::Error> for MyError {
-    fn from(e: io::Error) -> MyError {
-        MyError::FileWriteError
-    }
-}
-
-fn write_to_file_question() -> Result<(), MyError> {
-    let mut file = File::create("my_best_friends.txt")?;
-    Ok(())
-}
+// enum MyError {
+//     FileWriteError
+// }
+//
+// impl From<io::Error> for MyError {
+//     fn from(e: io::Error) -> MyError {
+//         MyError::FileWriteError
+//     }
+// }
+//
+// fn write_to_file_question() -> Result<(), MyError> {
+//     let mut file = File::create("my_best_friends.txt")?;
+//     Ok(())
+// }
 
 declare_types! {
     pub class JsSetBuilder as JsSetBuilder for Option<SetBuilder<io::BufWriter<File>>>{
@@ -53,6 +54,8 @@ declare_types! {
 
             // let mut wtr = try!(io::BufWriter::new(File::create(filename)));
 
+            // let mut buffer = io::BufWriter::new(File::create(filename).unwrap());
+            // let wtr = buffer.into_inner().unwrap();
 
             // let mut wtr = try!(io::BufWriter::new(File::create(filename).map_err(|e| e.to_string())));
 
