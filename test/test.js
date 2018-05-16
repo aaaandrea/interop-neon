@@ -5,10 +5,10 @@ const tape = require('tape');
 tape('build SetBuilder', (t) => {
     let build = new fst.SetBuilder("set.fst");
     t.ok(build, "SetBuilder built");
-    // t.throws(new fst.SetBuilder());
-    // t.throws(new fst.SetBuilder("/etc/passwd"));
-    // t.throws(new fst.SetBuilder({}));
-    // t.throws(new fst.SetBuilder(7));
+    t.throws(new fst.SetBuilder(), Error);
+    t.throws(new fst.SetBuilder("/etc/passwd"));
+    t.throws(new fst.SetBuilder({}));
+    t.throws(new fst.SetBuilder(7));
     t.end();
 })
 

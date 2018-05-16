@@ -7,37 +7,39 @@ use std::fs::File;
 use std::error::Error;
 
 use neon::mem::Handle;
-use neon::vm::{This, FunctionCall, Lock, JsResult};
+use neon::vm::{This, FunctionCall, Lock, JsResult, Throw, VmResult};
 use neon::js::{JsFunction, JsUndefined, Object, JsString, Value, JsBoolean};
+use neon::js::error::throw;
 use neon::js::class::{JsClass, Class};
 
 use fst::{Set, SetBuilder};
 
-
 trait CheckArgument<'a> {
-  fn check_argument<V: Value>(&mut self, i: i32) -> JsResult<'a, V>;
+  fn check_argument<V: Value>(&mut self, i: i32) -> VmResult<V>;
 }
 
 impl<'a, T: This> CheckArgument<'a> for FunctionCall<'a, T> {
-  fn check_argument<V: Value>(&mut self, i: i32) -> JsResult<'a, V> {
-    self.arguments.require(self.scope, i)?.check::<V>()
+  fn check_argument<V: Value>(&mut self, i: i32) -> VmResult<V> {
+    self.arguments.require(self.scope, i)
+            // .unwrap_or_else(|e| return Err(Throw))
+            .check::<V>()
   }
 }
 
-enum MyError {
-    FileWriteError
-}
-
-impl From<io::Error> for MyError {
-    fn from(e: io::Error) -> MyError {
-        MyError::FileWriteError
-    }
-}
-
-fn write_to_file_question() -> Result<(), MyError> {
-    let mut file = File::create("my_best_friends.txt")?;
-    Ok(())
-}
+// enum MyError {
+//     FileWriteError
+// }
+//
+// impl From<io::Error> for MyError {
+//     fn from(e: io::Error) -> MyError {
+//         MyError::FileWriteError
+//     }
+// }
+//
+// fn write_to_file_question() -> Result<(), MyError> {
+//     let mut file = File::create("my_best_friends.txt")?;
+//     Ok(())
+// }
 
 declare_types! {
     pub class JsSetBuilder as JsSetBuilder for Option<SetBuilder<io::BufWriter<File>>>{
@@ -46,13 +48,12 @@ declare_types! {
                 .check_argument::<JsString>(0)
                 ?.value();
 
-            // let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
-
-            let mut buffer = io::BufWriter::new(File::create(filename).unwrap());
-            let wtr = buffer.into_inner().unwrap();
+            let mut wtr = io::BufWriter::new(File::create(filename).unwrap());
 
             // let mut wtr = try!(io::BufWriter::new(File::create(filename)));
 
+            // let mut buffer = io::BufWriter::new(File::create(filename).unwrap());
+            // let wtr = buffer.into_inner().unwrap();
 
             // let mut wtr = try!(io::BufWriter::new(File::create(filename).map_err(|e| e.to_string())));
 
