@@ -12,6 +12,8 @@ install:
   - node -v
   - which node
   - curl https://sh.rustup.rs -sSf | sh
+  - export PATH="$HOME/.cargo/bin:$PATH"
+  - source "$HOME/.cargo/env"
   - make ${BUILDTYPE}
 
 # *Here we run tests*
