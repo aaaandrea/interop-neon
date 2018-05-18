@@ -14,6 +14,7 @@
     "node-pre-gyp": "^0.10.0"
   },
   "devDependencies": {
+    "aws-sdk": "^2.243.1",
     "tape": "4.6.3"
   },
   "scripts": {
@@ -22,10 +23,10 @@
     "test": "tape test/*.test.js"
   },
   "binary": {
-    "module_name": "interop_neon",
+    "module_name": "index",
     "host": "https://mapbox-node-binary.s3.amazonaws.com",
     "remote_path": "./{name}/v{version}/{configuration}/",
     "package_name": "{node_abi}-{platform}-{arch}.tar.gz",
-    "module_path": "./native/target/release/libinterop_neon.dylib"
+    "module_path": "./native/"
   }
 }
