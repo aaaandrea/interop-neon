@@ -18,9 +18,9 @@
     "tape": "4.6.3"
   },
   "scripts": {
-    "install": "neon build",
+    "install": "node-pre-gyp install --fallback-to-build=false || neon build",
     "build": "neon build",
-    "test": "tape test/*.test.js"
+    "test": "tape test/*.js"
   },
   "binary": {
     "module_name": "index",
